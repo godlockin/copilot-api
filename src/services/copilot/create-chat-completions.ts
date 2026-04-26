@@ -25,7 +25,14 @@ type ClaudeOpus47Effort = NonNullable<
 
 // Per-model effort caps for Claude. Mirror of the helper in
 // routes/messages/non-stream-translation.ts — keep in sync.
-const OPUS_47_ALLOWED_EFFORTS: Array<ClaudeOpus47Effort> = ["low", "medium"]
+// 2026-04 probe: upstream now accepts low/medium/high/xhigh/max for opus-4.7.
+const OPUS_47_ALLOWED_EFFORTS: Array<ClaudeOpus47Effort> = [
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]
 
 export const getAllowedClaudeEfforts = (
   modelId: string,

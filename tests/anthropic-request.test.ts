@@ -237,7 +237,7 @@ describe("opus-4.7 thinking + effort translation", () => {
     expect(out.thinking?.type).toBe("enabled")
   })
 
-  test("reasoning_effort=high downgraded to medium", () => {
+  test("reasoning_effort=high passes through (cap opened up)", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -245,10 +245,10 @@ describe("opus-4.7 thinking + effort translation", () => {
       reasoning_effort: "high",
     }
     const out = translateToOpenAI(payload)
-    expect(out.output_config?.effort).toBe("medium")
+    expect(out.output_config?.effort).toBe("high")
   })
 
-  test("reasoning_effort=max downgraded to medium", () => {
+  test("reasoning_effort=max passes through (cap opened up)", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -256,10 +256,10 @@ describe("opus-4.7 thinking + effort translation", () => {
       reasoning_effort: "max",
     }
     const out = translateToOpenAI(payload)
-    expect(out.output_config?.effort).toBe("medium")
+    expect(out.output_config?.effort).toBe("max")
   })
 
-  test("budget_tokens=24576 (would be high) capped to medium", () => {
+  test("budget_tokens=24576 maps to high (cap opened up)", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -267,7 +267,7 @@ describe("opus-4.7 thinking + effort translation", () => {
       thinking: { type: "enabled", budget_tokens: 24_576 },
     }
     const out = translateToOpenAI(payload)
-    expect(out.output_config?.effort).toBe("medium")
+    expect(out.output_config?.effort).toBe("high")
   })
 
   test("reasoning_effort=medium kept as medium", () => {

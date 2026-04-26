@@ -63,7 +63,16 @@ type ClaudeOpus47Effort = NonNullable<
 
 // Per-model effort caps. Upstream rejects efforts above the model's tier.
 // TODO: keep in sync with the mirror in services/copilot/create-chat-completions.ts.
-const OPUS_47_ALLOWED_EFFORTS: Array<ClaudeOpus47Effort> = ["low", "medium"]
+// 2026-04 probe: upstream now accepts low/medium/high/xhigh/max for opus-4.7
+// (and silently ignores unknown values), so the cap is opened up. Keep the
+// helper in place so we can re-tighten without restructuring callers.
+const OPUS_47_ALLOWED_EFFORTS: Array<ClaudeOpus47Effort> = [
+  "low",
+  "medium",
+  "high",
+  "xhigh",
+  "max",
+]
 
 function getAllowedClaudeEfforts(modelId: string): Array<ClaudeOpus47Effort> {
   if (isClaudeOpus47Model(modelId)) {
