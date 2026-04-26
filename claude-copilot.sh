@@ -89,6 +89,7 @@ start_server() {
   for i in {1..30}; do
     if curl -s "http://localhost:$PORT/v1/models" &> /dev/null; then
       log_success "Server started successfully at http://localhost:$PORT"
+      print_daemon_info
       return 0
     fi
     sleep 1
@@ -96,6 +97,18 @@ start_server() {
 
   log_error "Server failed to start. Check logs: $SCRIPT_DIR/server.log"
   return 1
+}
+
+# ============================================================
+# Print daemon info (log dir + usage URL)
+# ============================================================
+print_daemon_info() {
+  echo ""
+  log_info "Log file:    $SCRIPT_DIR/server.log"
+  log_info "Log dir:     $SCRIPT_DIR"
+  log_info "Usage page:  http://localhost:$PORT/usage"
+  log_info "Token info:  http://localhost:$PORT/token"
+  echo ""
 }
 
 # ============================================================
@@ -127,10 +140,36 @@ main() {
   echo "╚════════════════════════════════════════════════════════╝"
   echo ""
 
-  check_dependencies
-  check_auth
-  start_server
-  launch_claude "$@"
+  case "${1:-}" in
+    --daemon-start)
+      shift
+      check_dependencies
+      check_auth
+      start_server
+      log_success "Daemon started. Use 'claude-copilot --daemon-stop' to stop."
+      exit 0
+      ;;
+    --daemon-stop)
+      if [[ -f "$SCRIPT_DIR/.server.pid" ]]; then
+        PID=$(cat "$SCRIPT_DIR/.server.pid")
+        if kill "$PID" 2>/dev/null; then
+          log_success "Daemon stopped (PID $PID)"
+        else
+          log_warn "PID $PID not running"
+        fi
+        rm -f "$SCRIPT_DIR/.server.pid"
+      else
+        log_warn "No PID file found at $SCRIPT_DIR/.server.pid"
+      fi
+      exit 0
+      ;;
+    *)
+      check_dependencies
+      check_auth
+      start_server
+      launch_claude "$@"
+      ;;
+  esac
 }
 
 main "$@"
