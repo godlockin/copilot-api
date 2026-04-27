@@ -204,7 +204,7 @@ describe("opus-4.7 thinking + effort translation", () => {
   // stripSnapshotSuffix when state.models is empty. "claude-opus-4.7",
   // "claude-sonnet-4", and "gpt-5" all survive that path unchanged.
 
-  test("thinking.enabled passes through verbatim (NOT adaptive)", () => {
+  test("thinking.enabled is dropped (upstream uses output_config.effort instead)", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -212,10 +212,10 @@ describe("opus-4.7 thinking + effort translation", () => {
       thinking: { type: "enabled", budget_tokens: 4096 },
     }
     const out = translateToOpenAI(payload)
-    expect(out.thinking).toEqual({ type: "enabled", budget_tokens: 4096 })
+    expect(out.thinking).toBeUndefined()
   })
 
-  test("thinking.enabled without budget_tokens", () => {
+  test("thinking.enabled without budget_tokens is also dropped", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -223,10 +223,10 @@ describe("opus-4.7 thinking + effort translation", () => {
       thinking: { type: "enabled" },
     }
     const out = translateToOpenAI(payload)
-    expect(out.thinking?.type).toBe("enabled")
+    expect(out.thinking).toBeUndefined()
   })
 
-  test("thinking.adaptive is coerced to enabled (upstream rejects adaptive)", () => {
+  test("thinking.adaptive is dropped (no thinking field reaches upstream)", () => {
     const payload: AnthropicMessagesPayload = {
       model: "claude-opus-4.7",
       max_tokens: 64,
@@ -234,7 +234,7 @@ describe("opus-4.7 thinking + effort translation", () => {
       thinking: { type: "adaptive" },
     }
     const out = translateToOpenAI(payload)
-    expect(out.thinking?.type).toBe("enabled")
+    expect(out.thinking).toBeUndefined()
   })
 
   test("reasoning_effort=high passes through (cap opened up)", () => {
