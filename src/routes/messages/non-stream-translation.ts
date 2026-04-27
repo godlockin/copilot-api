@@ -162,23 +162,15 @@ function getClaudeOpus47Effort(
 function translateThinking(
   payload: AnthropicMessagesPayload,
 ): ChatCompletionsPayload["thinking"] {
-  const modelId = translateModelName(payload.model)
-
-  if (!isClaudeOpus47Model(modelId)) {
-    return undefined
-  }
-
-  const t = payload.thinking
-  if (!t) {
-    return undefined
-  }
-
-  // Upstream Copilot opus-4.7 only accepts {type: "enabled"} (no "adaptive",
-  // no "disabled"). The Anthropic schema admits "enabled" | "adaptive"; we
-  // coerce both to "enabled" so legacy clients sending "adaptive" keep working.
-  return t.budget_tokens === undefined ?
-      { type: "enabled" }
-    : { type: "enabled", budget_tokens: t.budget_tokens }
+  // Always drop the thinking field. Upstream Copilot opus-4.7 controls
+  // reasoning depth via output_config.effort instead. Forwarding the Anthropic
+  // thinking field has caused 400s ("Input tag 'adaptive'...") even after
+  // coercing type to "enabled" — the upstream validator appears to scan the
+  // overall request body, including conversation content, for thinking-shaped
+  // strings, which is fragile. Effort already conveys intent; thinking is
+  // redundant for this provider.
+  void payload
+  return undefined
 }
 
 function translateOutputConfig(
