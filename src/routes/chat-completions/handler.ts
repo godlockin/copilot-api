@@ -19,6 +19,7 @@ export async function handleCompletion(c: Context) {
   await checkRateLimit(state)
 
   let payload = await c.req.json<ChatCompletionsPayload>()
+  consola.info(`<-- ${c.req.method} (${payload.model}) ${c.req.path}`)
   consola.debug("Request payload:", JSON.stringify(payload).slice(-400))
 
   const resolvedModel = resolveModel(payload.model)
