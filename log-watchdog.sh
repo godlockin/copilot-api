@@ -8,7 +8,7 @@
 
 set -u
 
-LOG="/Users/steven.chen/working/sourcecode/tools/copilot-api/server.log"
+LOG="$(cd "$(dirname "$0")" && pwd)/server.log"
 MAX="${COPILOT_LOG_MAX_BYTES:-51200}"
 
 [[ -f "$LOG" ]] || exit 0

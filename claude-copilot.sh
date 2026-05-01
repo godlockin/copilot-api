@@ -164,19 +164,13 @@ claude-copilot() {
             return 0
         fi
 
-        log_info "正在启动 copilot-api 服务..."
-        local bin="${COPILOT_DIR}/dist/main.js"
-        if [[ -f "$bin" ]]; then
-            node "$bin" start -p "${COPILOT_PORT}" -a "${COPILOT_ACCOUNT_TYPE}" &
-        else
-            npx copilot-api@latest start -p "${COPILOT_PORT}" -a "${COPILOT_ACCOUNT_TYPE}" &
-        fi
-        local pid=$!
+        log_info "正在通过 launchd 启动 copilot-api 服务..."
+        launchctl start dev.copilot-api 2>/dev/null
 
         log_info "等待服务启动..."
         for i in {1..30}; do
             if curl -s "${COPILOT_BASE_URL}/usage" &>/dev/null; then
-                log_success "服务已启动 (PID: $pid)"
+                log_success "服务已启动"
                 return 0
             fi
             sleep 1
@@ -230,18 +224,11 @@ claude-copilot() {
 
         # Start service if not already running
         if ! curl -s "${COPILOT_BASE_URL}/usage" &>/dev/null; then
-            log_info "正在启动服务..."
-            local bin="${COPILOT_DIR}/dist/main.js"
-            if [[ -f "$bin" ]]; then
-                nohup node "$bin" start -p "${COPILOT_PORT}" -a "${COPILOT_ACCOUNT_TYPE}" >> "$LOG_FILE" 2>&1 &
-            else
-                nohup npx copilot-api@latest start -p "${COPILOT_PORT}" -a "${COPILOT_ACCOUNT_TYPE}" >> "$LOG_FILE" 2>&1 &
-            fi
-            local svc_pid=$!
-            log_info "等待服务启动 (PID: $svc_pid)..."
+            log_info "正在通过 launchd 启动服务..."
+            launchctl start dev.copilot-api 2>/dev/null
             for i in {1..30}; do
                 if curl -s "${COPILOT_BASE_URL}/usage" &>/dev/null; then
-                    log_success "服务已启动 (PID: $svc_pid)"
+                    log_success "服务已启动 (PID: $(lsof -ti tcp:"${COPILOT_PORT}" 2>/dev/null | head -1))"
                     break
                 fi
                 sleep 1
